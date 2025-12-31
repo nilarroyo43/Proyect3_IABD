@@ -6,7 +6,7 @@ def main():
     st.title("🌦 Weather Data Explorer – Proyecto IABD")
 
     # Load data
-    dt = pd.read_csv("dataset_entrenamiento_final.csv")
+    dt = pd.read_csv("data/training_datasets/dataset_entrenamiento_barcelona_MASTER.csv")
 
     # Ensure date column is datetime
     if "Fecha" in dt.columns:
