@@ -59,7 +59,6 @@ def predecir_temperatura(datos_hoy):
     pred_valor = pred[0]
     print(f"La prediccion es: {pred_valor:.2f}")
     
-    return pred
 
 
 # Predecir prueba
