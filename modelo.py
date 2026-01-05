@@ -4,14 +4,44 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 import requests
 import random
+from datetime import datetime, timedelta, date
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Leer el csv
-dt = pd.read_csv("dataset_entrenamiento_final.csv")
+dt = pd.read_csv("data/training_datasets/dataset_entrenamiento_barcelona_MASTER.csv")
 
 # Limpiar tabla
 # Sin Temp_Media_C_Media_3dias se equivoca menos a la hora de predecir la temperatura
-dt = dt.drop(columns=["Fecha", "Mes", "Dia_Del_Ano", "Temp_Media_C_Media_3dias"])
+dt = dt.drop(columns=["Fecha"])
 
 # Separar los datos en x y
 X = dt.drop("TARGET_Temp_Manana", axis=1)
