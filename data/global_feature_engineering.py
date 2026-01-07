@@ -80,14 +80,24 @@ for col in cols_tendencia:
         df_media[f'{col}_Delta'] = df_media[col].diff().fillna(0)
 
 # -----------------------------------------------------------
-# PASO 3: TARGET (EL FUTURO A PREDECIR)
+# PASO 3: TARGETS (EL FUTURO A PREDECIR)
 # -----------------------------------------------------------
-print("🎯 Generando Target (Temp Mañana)...")
-# Desplazamos la temperatura 1 día hacia atrás
+print("🎯 Generando Targets (Futuro)...")
+
+# Target 1: Temperatura de Mañana
 df_media['TARGET_Temp_Manana'] = df_media['Temp_Media_C'].shift(-1)
 
-# LIMPIEZA FINAL: Borrar la última fila (no tiene target)
-df_media = df_media.dropna(subset=['TARGET_Temp_Manana'])
+# Target 2: Lluvia de Mañana (Binario 0/1) <-- NUEVO
+if 'Lluvia_Binaria' in df_media.columns:
+    df_media['TARGET_Lluvia_Manana'] = df_media['Lluvia_Binaria'].shift(-1)
+
+# LIMPIEZA FINAL: Borrar la última fila (no tiene futuro conocido)
+# Nos aseguramos de borrar si falta CUALQUIERA de los targets importantes
+cols_targets = ['TARGET_Temp_Manana']
+if 'TARGET_Lluvia_Manana' in df_media.columns:
+    cols_targets.append('TARGET_Lluvia_Manana')
+
+df_media = df_media.dropna(subset=cols_targets)
 
 # -----------------------------------------------------------
 # PASO 4: GUARDADO
@@ -98,4 +108,4 @@ print(f"\n💾 EXCELENTE. Dataset Maestro guardado en: {ARCHIVO_FINAL}")
 print(f"   - Dimensiones finales: {df_media.shape}")
 print(f"   - Listo para entrenar Random Forest.")
 print(f"   - IMPORTANTE: En el entrenamiento, ELIMINA de X estas columnas:")
-print(f"     ['TARGET_Temp_Manana', 'Viento_Direccion_Grados', 'Precip_Total_mm', 'Dia_Del_Ano']")
+print(f"     ['Fecha, TARGET_Temp_Manana, Dia_Del_Ano, Viento_Direccion_Grados, Precip_Total_mm, TARGET_Lluvia_Manana']")

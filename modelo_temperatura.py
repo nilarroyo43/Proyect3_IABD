@@ -17,10 +17,11 @@ dt = pd.read_csv("data/training_datasets/dataset_entrenamiento_barcelona_MASTER.
 # Estas columnas confunden al modelo o son la respuesta
 cols_a_borrar_de_X = [
     "Fecha", 
-    "TARGET_Temp_Manana",       # La respuesta
-    "Dia_Del_Ano",              # Redundante (tenemos Sin/Cos)
-    "Viento_Direccion_Grados",  # Redundante (tenemos Sin/Cos)
-    "Precip_Total_mm"           # Redundante (tenemos Lluvia_Binaria)
+    "TARGET_Temp_Manana",     
+    "Dia_Del_Ano",              
+    "Viento_Direccion_Grados", 
+    "Precip_Total_mm" ,
+    "TARGET_Lluvia_Manana"         
 ]
 
 # Separar los datos en x y
@@ -61,14 +62,14 @@ print("Error en validation:", val_error)
 print("\n💾 Guardando el modelo entrenado...")
 
 # Guardamos el Modelo
-joblib.dump(modelo, 'data/model_memory/cerebro_meteo.pkl')
+joblib.dump(modelo, 'data/model_memory/cerebro_meteo_temperatura.pkl')
 
 # Guardamos el orden exacto de las columnas
 columnas_entrenamiento = list(X.columns)
-joblib.dump(columnas_entrenamiento, 'data/model_memory/columnas_modelo.pkl')
+joblib.dump(columnas_entrenamiento, 'data/model_memory/columnas_modelo_temperatura.pkl')
 
-print("✅ Modelo guardado como 'cerebro_meteo.pkl'")
-print("✅ Columnas guardadas como 'columnas_modelo.pkl'")
+print("✅ Modelo guardado como 'cerebro_meteo_temperatura.pkl'")
+print("✅ Columnas guardadas como 'columnas_modelo_temperatura.pkl'")
 print("   Ya puedes usar 'app_prediccion.py'")
 
 

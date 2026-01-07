@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from data.scraper_prediccion import obtener_media_barcelona 
 
 # === CONFIGURACIÓN ===
-RUTA_MODELO = "data/model_memory/cerebro_meteo.pkl"
-RUTA_COLUMNAS = "data/model_memory/columnas_modelo.pkl"
+RUTA_MODELO = "data/model_memory/cerebro_meteo_temperatura.pkl"
+RUTA_COLUMNAS = "data/model_memory/columnas_modelo_temperatura.pkl"
 RUTA_HISTORICO = "data/training_datasets/dataset_entrenamiento_barcelona_MASTER.csv" 
 
 def predecir_tiempo(fecha_target_str):
