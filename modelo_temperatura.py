@@ -12,7 +12,7 @@ RUTA_MODELO_PKL = "data/model_memory/cerebro_meteo_temperatura.pkl"
 RUTA_COLS_PKL = "data/model_memory/columnas_modelo_temperatura.pkl"
 
 
-def entrenar_modelo_nuevo():
+def entrenar_modelo_temperatura():
     print("\n INICIANDO PROCESO DE RE-ENTRENAMIENTO SEMANAL...")
     
     # 1. Cargar el Dataset Maestro (que ya contiene los datos nuevos de la semana)
