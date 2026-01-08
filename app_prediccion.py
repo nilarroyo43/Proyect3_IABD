@@ -5,9 +5,14 @@ import os
 from datetime import datetime, timedelta
 from data.scraper_prediccion import obtener_media_barcelona 
 
+
 # === CONFIGURACIÓN ===
-RUTA_MODELO = "data/model_memory/cerebro_meteo_temperatura.pkl"
-RUTA_COLUMNAS = "data/model_memory/columnas_modelo_temperatura.pkl"
+RUTA_MODELO_TEMPERATURA = "data/model_memory/cerebro_meteo_temperatura.pkl"
+RUTA_COLUMNAS_TEMPERATURA = "data/model_memory/columnas_modelo_temperatura.pkl"
+
+RUTA_MODELO_LLUVIA = "data/model_memory/cerebro_meteo_lluvia.pkl"
+RUTA_COLUMNAS_LLUVIA = "data/model_memory/columnas_modelo_lluvia.pkl"
+
 RUTA_HISTORICO = "data/training_datasets/dataset_entrenamiento_barcelona_MASTER.csv" 
 
 def predecir_tiempo(fecha_target_str):
@@ -34,19 +39,27 @@ def predecir_tiempo(fecha_target_str):
     print(f"\n🔮 Objetivo: Predecir el tiempo para el {fecha_target_str}")
     print(f"🕵️  Estrategia: Buscando datos reales de AYER ({fecha_datos_str})...")
 
-    # 2. CARGAR CEREBRO
-    if not os.path.exists(RUTA_MODELO):
-        print("❌ Error: Falta 'cerebro_meteo.pkl'. Ejecuta entrenar_modelo.py")
+    # 2. CARGAR CEREBROS
+    if not os.path.exists(RUTA_MODELO_TEMPERATURA):
+        print("❌ Error: Falta 'cerebro_meteo_temperatura.pkl'. Ejecuta entrenar_modelo.py")
+        return
+    
+    if not os.path.exists(RUTA_MODELO_LLUVIA):
+        print("❌ Error: Falta 'cerebro_meteo_lluvia.pkl'. Ejecuta entrenar_modelo.py")
         return
 
-    modelo = joblib.load(RUTA_MODELO)
-    cols_entrenamiento = joblib.load(RUTA_COLUMNAS)
+    modelo_temperatura = joblib.load(RUTA_MODELO_TEMPERATURA)
+    cols_entrenamiento_temperatura = joblib.load(RUTA_COLUMNAS_TEMPERATURA)
+    
+    modelo_lluvia = joblib.load(RUTA_MODELO_LLUVIA)
+    cols_entrenamiento_lluvia = joblib.load(RUTA_COLUMNAS_LLUVIA)
     
     # Cargar histórico para las medias móviles
     df_hist = pd.read_csv(RUTA_HISTORICO)
     df_hist['Fecha'] = pd.to_datetime(df_hist['Fecha'])
     
     # 3. SCRAPING (Usamos la fecha RESTADA)
+
     df_hoy_raw = obtener_media_barcelona(fecha_datos_str)
     
     if df_hoy_raw is None:
@@ -55,13 +68,26 @@ def predecir_tiempo(fecha_target_str):
         return
 
     df_hoy_raw['Fecha'] = pd.to_datetime(df_hoy_raw['Fecha'])
-
+    
+    
+    
+    
+    # 4. UNIR CON HISTORIA (Ingeniería de datos)
     # 4. UNIR CON HISTORIA (Ingeniería de datos)
     cols_raw = [c for c in df_hoy_raw.columns if c in df_hist.columns]
-    contexto = df_hist[cols_raw].tail(14).copy()
-    
+
+    fecha_dt = pd.to_datetime(fecha_datos_str)
+
+    hist_filtrado = df_hist[df_hist["Fecha"] < fecha_dt].copy()
+
+    contexto = hist_filtrado[cols_raw].tail(14).copy()
+
     df_full = pd.concat([contexto, df_hoy_raw], ignore_index=True)
-    df_full = df_full.sort_values('Fecha').set_index('Fecha')
+    df_full["Fecha"] = pd.to_datetime(df_full["Fecha"])
+    df_full = df_full.sort_values("Fecha").set_index("Fecha")
+
+    
+    
     
     # 5. RE-CALCULAR FEATURES
     # A) Ciclos
@@ -90,17 +116,32 @@ def predecir_tiempo(fecha_target_str):
             df_full[f'{col}_Delta'] = df_full[col].diff().fillna(0)
 
     # 6. FILTRAR FILA PARA EL MODELO
-    fila_prediccion = df_full.iloc[[-1]].copy()
-    X_final = pd.DataFrame(index=fila_prediccion.index)
     
-    for col in cols_entrenamiento:
+    
+    
+    fila_prediccion = df_full.iloc[[-1]].copy()
+    
+    # X para temperatura
+    X_temperatura = pd.DataFrame(index=fila_prediccion.index)
+    for col in cols_entrenamiento_temperatura:
         if col in fila_prediccion.columns:
-            X_final[col] = fila_prediccion[col]
+            X_temperatura[col] = fila_prediccion[col]
         else:
-            X_final[col] = 0 
+            X_temperatura[col] = 0 
             
+    # X para lluvia
+    X_lluvia = pd.DataFrame(index=fila_prediccion.index)
+    for col in cols_entrenamiento_lluvia:
+        if col in fila_prediccion.columns:
+            X_lluvia[col] = fila_prediccion[col]
+        else:
+            X_lluvia[col] = 0 
+
+    
+
     # 7. PREDICCIÓN FINAL
-    temp_predicha = modelo.predict(X_final)[0]
+    temp_predicha = modelo_temperatura.predict(X_temperatura)[0]
+    temp_predicha_lluvia = modelo_lluvia.predict(X_lluvia)[0]
     
     print("\n" + "="*50)
     print(f"📅 PARA LA FECHA:         {fecha_target_str}")
@@ -109,6 +150,15 @@ def predecir_tiempo(fecha_target_str):
     print("="*50 + "\n")
     
     print(f"(Basado en los datos reales del día anterior: {fila_prediccion['Temp_Media_C'].values[0]:.1f}°C)")
+
+    
+    proba_lluvia = modelo_lluvia.predict_proba(X_lluvia)[0][1]
+    umbral = 0.30  
+    lluvia_predicha = 1 if proba_lluvia >= umbral else 0
+
+    print(f"🌧️ Prob. lluvia: {proba_lluvia*100:.1f}% (umbral {umbral})")
+    print(f"🌧️ Lluvia prevista: {'Sí' if lluvia_predicha else 'No'}")
+    
 
 # === EJECUCIÓN ===
 if __name__ == "__main__":
