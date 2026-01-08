@@ -1,0 +1,38 @@
+name: Prediccion Diaria MeteoBCN
+
+on:
+  schedule:
+    # Se ejecuta todos los días a las 09:00 UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Permite ejecutarlo manualmente desde la web de GitHub
+
+permissions:
+  contents: write # Permiso para guardar el CSV actualizado
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Instalar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar librerías
+        run: |
+          pip install pandas requests joblib scikit-learn lxml
+
+      - name: Ejecutar Pipeline
+        run: python app_prediccion.py
+
+      - name: Guardar cambios (Commit & Push)
+        run: |
+          git config --global user.name 'GitHub Action Bot'
+          git config --global user.email 'action@github.com'
+          git add data/training_datasets/*.csv
+          git add data/model_memory/*.pkl
+          git commit -m "🤖 Actualización diaria automática de datos" || echo "Sin cambios"
+          git push
