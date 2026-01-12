@@ -2,8 +2,8 @@ name: Prediccion Diaria MeteoBCN
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 09:00 UTC
-    - cron: '0 14 * * *'
+    # Se ejecuta todos los días a las 14:00 UTC
+    - cron: '0 9 * * *'
   workflow_dispatch: # Permite ejecutarlo manualmente desde la web de GitHub
 
 permissions:
