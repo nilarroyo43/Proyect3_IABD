@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_score
 import joblib
 
 
@@ -55,7 +55,12 @@ def entrenar_modelo_temperatura():
     # 5. Validación rápida (opcional, para ver si va bien)
     val_pred = modelo.predict(X_test)
     val_error = mean_absolute_error(y_test, val_pred)
+    rmse = root_mean_squared_error(y_test, val_pred)
+    coefficient_of_determination = r2_score(y_test, val_pred)
     print(f"    Error Medio (MAE) del nuevo modelo: {val_error:.4f} °C")
+    print(f"    Raíz del error cuadrático medio (RMSE) del nuevo modelo: {rmse:.4f}")
+    print(f"    Coeficiente de determinación (R²) del nuevo modelo: {coefficient_of_determination:.4f}")
+
 
     # 6. Guardar el Cerebro
     joblib.dump(modelo, RUTA_MODELO_PKL)
@@ -67,7 +72,7 @@ def entrenar_modelo_temperatura():
     print("✅ RE-ENTRENAMIENTO FINALIZADO. Modelo actualizado guardado.")
     
 if __name__ == "__main__":
-    entrenar_modelo_nuevo()
+    entrenar_modelo_temperatura()
 
 
 
