@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 
 # IMPORTAMOS TUS HERRAMIENTAS
 from data.scraper_prediccion import obtener_media_barcelona
-from modelo_temperatura import entrenar_modelo_temperatura 
-from modelo_lluvia import entrenar_modelo_lluvia
+from models.modelo_temperatura import entrenar_modelo_temperatura 
+from models.modelo_lluvia import entrenar_modelo_lluvia
 
 # === CONFIGURACIÓN ===
 # Rutas unificadas para ambos modelos
