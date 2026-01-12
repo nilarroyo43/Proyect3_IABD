@@ -32,9 +32,11 @@ A continuación se detalla la organización técnica del proyecto:
 ```text
 proyect3_IABD/
 │
-├── 📜 app_prediccion.py          # [ENTRY POINT] Orquestador principal. Ejecuta el pipeline diario.
-├── 📜 modelo_temperatura.py      # Módulo de entrenamiento (Regresor Random Forest).
-├── 📜 modelo_lluvia.py           # Módulo de entrenamiento (Clasificador Random Forest).
+├── 📜 app_prediccion.py    # [ENTRY POINT] Orquestador principal. Ejecuta el pipeline diario.
+│      
+├── 📂 models/
+│   ├── 📜 modelo_temperatura.py      # Módulo de entrenamiento (Regresor Random Forest).
+│   ├── 📜 modelo_lluvia.py           # Módulo de entrenamiento (Clasificador Random Forest).
 │
 ├── 📂 data/                      # Gestión de Datos y Modelos
 │   ├── 📜 scraper_prediccion.py  # Herramienta de Web Scraping (Meteocat).
@@ -51,6 +53,10 @@ proyect3_IABD/
 │       ├── cerebro_meteo_temperatura.pkl
 │       ├── cerebro_meteo_lluvia.pkl
 │       └── *.pkl (Metadatos de columnas)
+│
+├── 📂 data/  
+│   ├── 📜 scraper_prediccion.py  
+│
 │
 └── 📜 requirements.txt           # Dependencias del proyecto
 ```
@@ -95,15 +101,15 @@ Sigue estos pasos para ejecutar el sistema en local:
 
     python -m venv venv
     source venv/bin/activate  # En Windows: venv\Scripts\activate
+    ```
+
+    ```bash
     Instalar dependencias:
-    ```
-    ```bash
-
     pip install -r requirements.txt
-    Ejecutar el Pipeline:
     ```
-    ```bash
 
+    ```bash
+    Ejecutar el Pipeline:
     python app_prediccion.py
     El sistema detectará automáticamente si faltan datos de ayer, los descargará y generará la predicción.
     ```
@@ -119,5 +125,5 @@ El modelo ha sido validado utilizando un split temporal (Train/Test) para evitar
 ## 👥  Autores
 Proyecto desarrollado para el Máster en IABD.
 Nil Arroyo
-Pol "apellido por poner"
-Ronald "apellido por poner"
+Pol Panyella
+Ronald Intriago
