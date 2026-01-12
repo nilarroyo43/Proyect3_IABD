@@ -54,8 +54,8 @@ proyect3_IABD/
 │       ├── cerebro_meteo_lluvia.pkl
 │       └── *.pkl (Metadatos de columnas)
 │
-├── 📂 data/  
-│   ├── 📜 scraper_prediccion.py  
+├── 📂 ui/  
+│   ├── 📜 st_interface.py       # Interfaz grafica
 │
 │
 └── 📜 requirements.txt           # Dependencias del proyecto
