@@ -111,8 +111,8 @@ def pipeline_completo():
     # FASE 2: RE-ENTRENAMIENTO (LUNES)
     # ==============================================================================
     hoy = datetime.now()
-    if hoy.weekday() == 1:
-        print("\n📅 Es Martes: Ejecutando Re-entrenamiento Semanal...")
+    if hoy.weekday() == 0:
+        print("\n📅 Es Lunes: Ejecutando Re-entrenamiento Semanal...")
         # NOTA: Asegúrate de que 'entrenar_modelo_nuevo' también sepa entrenar
         # el modelo de lluvia, o llama aquí a una función extra para la lluvia.
         entrenar_modelo_temperatura()
