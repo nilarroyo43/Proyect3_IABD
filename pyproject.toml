@@ -8,6 +8,8 @@ dependencies = [
     "lxml>=6.0.2",
     "matplotlib>=3.10.8",
     "scikit-learn>=1.8.0",
+    "seaborn>=0.13.2",
+    "sns>=0.1",
     "streamlit>=1.52.1",
     "tqdm>=4.67.1",
 ]
