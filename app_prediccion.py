@@ -153,34 +153,6 @@ def pipeline_completo():
     for col in cols_lluvia:
         X_lluvia[col] = fila_prediccion[col] if col in fila_prediccion else 0
 
-    # 3. Predecir
-    pred_temp = mod_temp.predict(X_temp)[0]
     
-    # Lluvia: Usamos probabilidad para ser más precisos
-    try:
-        prob_lluvia = mod_lluvia.predict_proba(X_lluvia)[0][1] # Probabilidad de clase 1 (Sí)
-    except:
-        prob_lluvia = mod_lluvia.predict(X_lluvia)[0] # Fallback si no es clasificador
-        
-    umbral_lluvia = 0.30 # Si hay más de 30% de probabilidad, avisamos
-    es_lluvia = prob_lluvia > umbral_lluvia
-    
-    fecha_target = fila_prediccion.index[0] + timedelta(days=1)
-    
-    print("-" * 50)
-    print(f"📅 BASADO EN DATOS DE:      {fila_prediccion.index[0].date()}")
-    print("-" * 50)
-    print(f"🌡️  Temperatura Ayer:    {fila_prediccion['Temp_Media_C'].values[0]:.2f} °C")
-    print("-" * 50)
-    print(f"🚀  PREDICCIÓN PARA HOY/MAÑANA ({fecha_target.date()}):")
-    print(f"    🌡️  Temperatura:  {pred_temp:.2f} °C")
-    print(f"    💧  Lluvia:       {prob_lluvia*100:.1f}% de probabilidad")
-    
-    if es_lluvia:
-        print("    ☔  AVISO: ¡Coge el paraguas!")
-    else:
-        print("    ☀️  Tranquilo, probablemente no llueva.")
-    print("=" * 50)
-
 if __name__ == "__main__":
     pipeline_completo()
