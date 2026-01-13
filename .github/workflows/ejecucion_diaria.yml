@@ -4,6 +4,8 @@ on:
   schedule:
     # Se ejecuta todos los días a las 09:00 UTC
     - cron: '0 9 * * *'
+    # Se ejecuta a las 16:00 UTC (Intenta coger datos de hoy)
+    - cron: '0 16 * * *'
   workflow_dispatch: # Permite ejecutarlo manualmente desde la web de GitHub
 
 permissions:

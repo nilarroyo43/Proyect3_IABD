@@ -35,14 +35,24 @@ def pipeline_completo():
     df_hist = df_hist.sort_values('Fecha')
     
     ultima_fecha = df_hist['Fecha'].iloc[-1]
-    # Buscamos datos de AYER (porque hoy aún no ha terminado)
-    fecha_ayer = pd.to_datetime(datetime.now().date() - timedelta(days=1))
+    ahora = datetime.now()
+    hora_actual = ahora.hour  # Hora del servidor (Ojo: GitHub Actions usa UTC)
+    
+    # Si ejecutamos por la tarde (después de las 15:00), intentamos coger HOY.
+    # Si ejecutamos por la mañana (ej. 09:00), cogemos AYER.
+    if hora_actual >= 15:
+        print(f"🕒 Son las {hora_actual}:00 (Tarde). Intentando descargar datos de HOY...")
+        fecha_objetivo = pd.to_datetime(ahora.date())
+    else:
+        print(f"🕒 Son las {hora_actual}:00 (Mañana). Descargando cierre de AYER...")
+        fecha_objetivo = pd.to_datetime(ahora.date() - timedelta(days=1))
     
     nuevo_dato_agregado = False
 
-    # A) DESCARGA Y UNIÓN (Lógica Automática)
-    if ultima_fecha < fecha_ayer:
-        fecha_obj_str = fecha_ayer.strftime("%Y-%m-%d")
+    # A) DESCARGA Y UNIÓN
+    # Comparamos si la última fecha que tenemos es anterior a la que queremos
+    if ultima_fecha < fecha_objetivo:
+        fecha_obj_str = fecha_objetivo.strftime("%Y-%m-%d")
         print(f"📥 Descargando datos nuevos del {fecha_obj_str}...")
         
         df_nuevo_raw = obtener_media_barcelona(fecha_obj_str)
@@ -153,6 +163,34 @@ def pipeline_completo():
     for col in cols_lluvia:
         X_lluvia[col] = fila_prediccion[col] if col in fila_prediccion else 0
 
+    # 3. Predecir
+    pred_temp = mod_temp.predict(X_temp)[0]
     
+    # Lluvia: Usamos probabilidad para ser más precisos
+    try:
+        prob_lluvia = mod_lluvia.predict_proba(X_lluvia)[0][1] # Probabilidad de clase 1 (Sí)
+    except:
+        prob_lluvia = mod_lluvia.predict(X_lluvia)[0] # Fallback si no es clasificador
+        
+    umbral_lluvia = 0.30 # Si hay más de 30% de probabilidad, avisamos
+    es_lluvia = prob_lluvia > umbral_lluvia
+    
+    fecha_target = fila_prediccion.index[0] + timedelta(days=1)
+    
+    print("-" * 50)
+    print(f"📅 BASADO EN DATOS DE:      {fila_prediccion.index[0].date()}")
+    print("-" * 50)
+    print(f"🌡️  Temperatura Ayer:    {fila_prediccion['Temp_Media_C'].values[0]:.2f} °C")
+    print("-" * 50)
+    print(f"🚀  PREDICCIÓN PARA HOY/MAÑANA ({fecha_target.date()}):")
+    print(f"    🌡️  Temperatura:  {pred_temp:.2f} °C")
+    print(f"    💧  Lluvia:       {prob_lluvia*100:.1f}% de probabilidad")
+    
+    if es_lluvia:
+        print("    ☔  AVISO: ¡Coge el paraguas!")
+    else:
+        print("    ☀️  Tranquilo, probablemente no llueva.")
+    print("=" * 50)
+
 if __name__ == "__main__":
     pipeline_completo()
