@@ -1,4 +1,3 @@
-
 # 🌦️ MeteoBCN: Sistema Predictivo Inteligente (End-to-End)
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
@@ -93,7 +92,6 @@ Sigue estos pasos para ejecutar el sistema en local:
 1. **Clonar el repositorio:**
    ```bash
    git clone [https://github.com/nilarroyo43/Proyect3_IABD.git](https://github.com/nilarroyo43/Proyect3_IABD.git)
-   cd MeteoBCN
    ```
 2. **Crear entorno virtual (Recomendado):**
 
@@ -105,13 +103,18 @@ Sigue estos pasos para ejecutar el sistema en local:
 
     ```bash
     Instalar dependencias:
-    pip install -r requirements.txt
+    uv sync
     ```
 
     ```bash
     Ejecutar el Pipeline:
     python app_prediccion.py
-    El sistema detectará automáticamente si faltan datos de ayer, los descargará y generará la predicción.
+    El sistema detectará automáticamente si faltan datos de hoy y los descargará.
+    ```
+
+    ```bash
+    Ejecutar interfaz
+    uv run streamlit run main.py
     ```
 ---
 
