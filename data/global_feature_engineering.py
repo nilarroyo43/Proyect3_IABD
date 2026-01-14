@@ -21,7 +21,7 @@ if not archivos:
     print("No encuentro archivos 'clean_...'.")
     exit()
 
-print(f"🔄 Fusionando {len(archivos)} estaciones: {archivos}")
+print(f" Fusionando {len(archivos)} estaciones: {archivos}")
 
 lista_dfs = []
 for a in archivos:
@@ -49,7 +49,7 @@ if 'v_sin' in df_media.columns:
 # -----------------------------------------------------------
 # PASO 2: CREACIÓN DE FEATURES (VARIABLES PARA IA)
 # -----------------------------------------------------------
-print("⚙️ Generando variables predictivas...")
+print(" Generando variables predictivas...")
 
 # A) Fechas Cíclicas (Calendario Circular)
 df_media['Dia_Del_Ano'] = df_media.index.dayofyear
@@ -82,7 +82,7 @@ for col in cols_tendencia:
 # -----------------------------------------------------------
 # PASO 3: TARGETS (EL FUTURO A PREDECIR)
 # -----------------------------------------------------------
-print("🎯 Generando Targets (Futuro)...")
+print(" Generando Targets (Futuro)...")
 
 # Target 1: Temperatura de Mañana
 df_media['TARGET_Temp_Manana'] = df_media['Temp_Media_C'].shift(-1)
@@ -104,7 +104,7 @@ df_media = df_media.dropna(subset=cols_targets)
 # -----------------------------------------------------------
 df_media.to_csv(ARCHIVO_FINAL)
 
-print(f"\n💾 EXCELENTE. Dataset Maestro guardado en: {ARCHIVO_FINAL}")
+print(f"\n EXCELENTE. Dataset Maestro guardado en: {ARCHIVO_FINAL}")
 print(f"   - Dimensiones finales: {df_media.shape}")
 print(f"   - Listo para entrenar Random Forest.")
 print(f"   - IMPORTANTE: En el entrenamiento, ELIMINA de X estas columnas:")

@@ -20,7 +20,7 @@ print("===========================================")
 
 for archivo in ARCHIVOS_ENTRADA:
     if not os.path.exists(archivo):
-        print(f"⚠️  Saltando {archivo} (No existe)")
+        print(f"  Saltando {archivo} (No existe)")
         continue
 
     print(f"\nPROCESANDO: {archivo}")
@@ -84,6 +84,6 @@ for archivo in ARCHIVOS_ENTRADA:
     ruta_carpeta = HERE / "clean_datasets"
     ruta_completa = ruta_carpeta / nombre_limpio
     df.to_csv(ruta_completa)
-    print(f"   ✅ Archivo limpio guardado: {nombre_limpio}")
+    print(f"    Archivo limpio guardado: {nombre_limpio}")
 
-print("\n🏁 FASE 1 COMPLETADA.")
+print("\n FASE 1 COMPLETADA.")

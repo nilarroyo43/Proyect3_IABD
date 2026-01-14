@@ -159,9 +159,9 @@ if datos_diarios:
     # Guardamos
     dataset_final.to_csv(ruta_completa, index=False)
     
-    print(f"\n✅ Guardado con éxito en:")
-    print(f"📂 {ruta_completa}")
-    print(f"📊 Filas totales: {len(dataset_final)}")
+    print(f"\n Guardado con éxito en:")
+    print(f" {ruta_completa}")
+    print(f" Filas totales: {len(dataset_final)}")
 
 else:
-    print("\n⚠️ No se han extraído datos.")
+    print("\n No se han extraído datos.")

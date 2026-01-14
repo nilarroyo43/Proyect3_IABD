@@ -30,7 +30,7 @@ def obtener_media_barcelona(fecha_str):
     Entrada: "2025-12-19" (String YYYY-MM-DD)
     Salida: DataFrame de 1 fila con la MEDIA de las 3 estaciones.
     """
-    print(f"🌍 Conectando a Meteocat para el día {fecha_str}...")
+    print(f" Conectando a Meteocat para el día {fecha_str}...")
     
     dfs_estaciones = []
 
@@ -46,7 +46,7 @@ def obtener_media_barcelona(fecha_str):
             response = requests.get(url, headers=headers, timeout=10)
             
             if response.status_code != 200:
-                print(f"   ⚠️ Error bajando estación {codigo} (Status {response.status_code})")
+                print(f"    Error bajando estación {codigo} (Status {response.status_code})")
                 continue
 
             tablas_encontradas = pd.read_html(response.text)
@@ -109,10 +109,10 @@ def obtener_media_barcelona(fecha_str):
                 # print(f"   ✅ Datos {codigo} procesados correctamente.")
 
         except Exception as e:
-            print(f"   ❌ Error procesando {codigo}: {e}")
+            print(f"    Error procesando {codigo}: {e}")
 
     if not dfs_estaciones:
-        print("❌ CRÍTICO: No se pudo bajar información de ninguna estación.")
+        print(" CRÍTICO: No se pudo bajar información de ninguna estación.")
         return None
 
     # 2. FUSIÓN Y MEDIA (Matemática Vectorial)
@@ -152,5 +152,5 @@ if __name__ == "__main__":
     
     datos = obtener_media_barcelona(ayer)
     if datos is not None:
-        print("\n📊 RESULTADO FINAL (MEDIA BARCELONA):")
+        print("\n RESULTADO FINAL (MEDIA BARCELONA):")
         print(datos.T)
