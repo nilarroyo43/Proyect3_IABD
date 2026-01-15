@@ -3,7 +3,7 @@ name: Prediccion Diaria MeteoBCN
 on:
   schedule:
     - cron: '0 8 * * *'   # 09:00 Spain Time
-    - cron: '0 13 * * *'  # 16:00 Spain Time
+    - cron: '0 15 * * *'  # 16:00 Spain Time
   workflow_dispatch:
 
 permissions:
