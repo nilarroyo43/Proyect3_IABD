@@ -14,91 +14,104 @@ RUTA_HISTORICO = "data/training_datasets/dataset_entrenamiento_barcelona_MASTER.
 
 def pipeline_mantenimiento():
     """
-    Pipeline de MLOps:
-    1. Descarga datos nuevos (ETL).
-    2. Si hay datos nuevos o es lunes, re-entrena los modelos.
-    NOTA: No realiza predicciones (eso se hace en la interfaz web).
+    Pipeline Secuencial:
+    1. Lee el histórico para ver dónde nos quedamos.
+    2. Decide QUÉ fecha pedir (siguiente día o actualizar hoy).
+    3. Llama al scraper con esa fecha específica.
     """
-    print(" INICIANDO PIPELINE DE MANTENIMIENTO (ETL + RE-ENTRENO)")
-    print("==========================================================")
+    print(" INICIANDO PIPELINE DE MANTENIMIENTO")
+    print("========================================")
     
-    # ==============================================================================
-    # FASE 1: ACTUALIZACIÓN DE DATOS (ETL + FEATURE ENGINEERING)
-    # ==============================================================================
+    # -------------------------------------------------------------------------
+    # 1. LEER EL HISTÓRICO (Para saber qué fecha pedir)
+    # -------------------------------------------------------------------------
     if not os.path.exists(RUTA_HISTORICO):
         print(" Error crítico: No existe el dataset maestro.")
         return
 
-    # 1. Cargar Histórico
     df_historico = pd.read_csv(RUTA_HISTORICO)
     df_historico['Fecha'] = pd.to_datetime(df_historico['Fecha'])
     df_historico = df_historico.sort_values('Fecha')
     
-    ultima_fecha = df_historico['Fecha'].iloc[-1]
-    print(f" Última fecha registrada: {ultima_fecha.date()}")
+    ultima_fecha = df_historico['Fecha'].iloc[-1].date() # Solo la fecha, sin hora
+    hoy = datetime.now().date()
+    
+    print(f" Última fecha en CSV: {ultima_fecha}")
+    print(f" Fecha real de hoy:   {hoy}")
 
-    # 2. Buscar nuevos datos (Scraping)
-    print(" Conectando con Meteocat...")
+    # -------------------------------------------------------------------------
+    # 2. CALCULAR LA FECHA OBJETIVO (String)
+    # -------------------------------------------------------------------------
+    # Lógica:
+    # - Si la última fecha es menor que hoy (ayer o antes) -> Toca pedir el SIGUIENTE día.
+    # - Si la última fecha es HOY -> Toca pedir HOY otra vez (para actualizar dato).
+    
+    if ultima_fecha < hoy:
+        # Caso normal: Vamos a por el día siguiente
+        fecha_target = ultima_fecha + timedelta(days=1)
+    else:
+        # Caso actualización: Vamos a refrescar el dato de hoy
+        fecha_target = ultima_fecha
+
+    # Convertimos a String 'YYYY-MM-DD' que es lo que pide tu función
+    fecha_str = fecha_target.strftime('%Y-%m-%d')
+    
+    print(f" Fecha calculada para scrapear: {fecha_str}")
+
+    # -------------------------------------------------------------------------
+    # 3. LLAMAR AL SCRAPER (Ahora sí, con el argumento)
+    # -------------------------------------------------------------------------
     try:
-        nuevos_datos = obtener_media_barcelona() # Devuelve DataFrame con la fila de hoy/ayer o None
+        print(f" Llamando a obtener_media_barcelona('{fecha_str}')...")
+        
+        # AQUÍ ESTABA EL ERROR: Ahora le pasamos el argumento obligatorio
+        nuevos_datos = obtener_media_barcelona(fecha_str)
+        
         datos_guardados = False
 
         if nuevos_datos is not None and not nuevos_datos.empty:
+            # Aseguramos formato fecha en el dato recibido
             nuevos_datos['Fecha'] = pd.to_datetime(nuevos_datos['Fecha'])
-            fecha_nueva = nuevos_datos['Fecha'].iloc[0]
+            fecha_recibida = nuevos_datos['Fecha'].iloc[0].date()
+            
+            print(f" Dato recibido correctamente para: {fecha_recibida}")
 
-            if fecha_nueva > ultima_fecha:
-                print(f" DATO NUEVO ENCONTRADO: {fecha_nueva.date()}")
-                # Concatenar
+            # --- Lógica de Guardado ---
+            if fecha_recibida > ultima_fecha:
+                print(" ES UN DÍA NUEVO. Añadiendo al final...")
                 df_actualizado = pd.concat([df_historico, nuevos_datos], ignore_index=True)
-                # Limpieza extra por si acaso
-                df_actualizado = df_actualizado.drop_duplicates(subset='Fecha', keep='last')
-                # Guardar
                 df_actualizado.to_csv(RUTA_HISTORICO, index=False)
-                print(" Dataset maestro actualizado.")
                 datos_guardados = True
                 
-            elif fecha_nueva == ultima_fecha:
-                print("ℹ Actualización intra-día (el dato ya existía, se sobreescribe por si ha variado).")
-                df_historico = df_historico[df_historico['Fecha'] != fecha_nueva]
+            elif fecha_recibida == ultima_fecha:
+                print(" ES EL MISMO DÍA. Actualizando/Sobreescribiendo...")
+                # Borramos la fila vieja y ponemos la nueva
+                df_historico = df_historico[df_historico['Fecha'].dt.date != fecha_recibida]
                 df_actualizado = pd.concat([df_historico, nuevos_datos], ignore_index=True)
                 df_actualizado.to_csv(RUTA_HISTORICO, index=False)
-                print(" Dato actualizado.")
                 datos_guardados = True
-            else:
-                print(" El dato descargado es antiguo. No se guarda.")
         else:
-            print(" No se han encontrado datos nuevos disponibles.")
+            print(f" El scraper funcionó, pero Meteocat no tiene datos para {fecha_str} todavía.")
 
     except Exception as e:
-        print(f" Error en ETL: {e}")
+        print(f" Error crítico durante el scraping: {e}")
         datos_guardados = False
 
-    # ==============================================================================
-    # FASE 2: RE-ENTRENAMIENTO (MLOPS)
-    # ==============================================================================
-    # Regla: Se re-entrena si hay datos nuevos O si es Lunes (para refrescar la lógica temporal)
+    # -------------------------------------------------------------------------
+    # 4. RE-ENTRENAMIENTO (Si hubo cambios)
+    # -------------------------------------------------------------------------
     es_lunes = datetime.today().weekday() == 0
     
-    if datos_guardados or es_lunes:
-        print("\n DETECTADA NECESIDAD DE RE-ENTRENAMIENTO...")
-        if datos_guardados: print("   -> Motivo: Nuevos datos ingresados.")
-        if es_lunes: print("   -> Motivo: Mantenimiento semanal (Lunes).")
-
+    if  es_lunes:
+        print("\n Es lunes, Actualizando modelos...")
         try:
-            print("   🌡️ Re-entrenando Modelo Temperatura...")
             entrenar_modelo_temperatura()
-            
-            print("   ☔ Re-entrenando Modelo Lluvia...")
             entrenar_modelo_lluvia()
-            
-            print(" Modelos actualizados correctamente en 'data/model_memory/'")
+            print(" Modelos re-entrenados.")
         except Exception as e:
-            print(f" Error crítico entrenando modelos: {e}")
+            print(f" Error re-entrenando: {e}")
     else:
-        print("\n No se requiere re-entrenamiento hoy.")
-
-    print("\n FIN DEL PROCESO DE MANTENIMIENTO.")
+        print("\n No se requiere re-entrenamiento.")
 
 if __name__ == "__main__":
     pipeline_mantenimiento()
